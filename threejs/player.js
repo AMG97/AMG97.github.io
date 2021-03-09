@@ -1,8 +1,9 @@
 class Player {
-	constructor(){
-		this.speed=800;
-		this.last_rot='down';
-	}
+
+	this=this;
+
+	speed=800;
+	last_rot='down';
 
 	static #model_body;
 	static #model_arm;
@@ -37,37 +38,42 @@ class Player {
 	loadPlayer(x,z,scene)
 	{
 		this.m_player = new THREE.Object3D();
-		this.m_player = Player.#model_body.clone();
 
-		this.m_farmer_arm_1 = new THREE.Object3D();
-		this.m_farmer_arm_1 = Player.#model_arm.clone();
-		this.m_farmer_arm_1.position.set(-0.1,0.45,-0.35);
+		this.m_body = new THREE.Object3D();
+		this.m_body = Player.#model_body.clone();
 
-		this.m_farmer_arm_2 = new THREE.Object3D();
-		this.m_farmer_arm_2 =this.m_farmer_arm_1.clone();
-		this.m_farmer_arm_2.position.z=0.35;
-		this.m_farmer_arm_2.rotateY(Math.PI);
+		this.m_arm_1 = new THREE.Object3D();
+		this.m_arm_1 = Player.#model_arm.clone();
+		this.m_arm_1.position.set(-0.1,0.45,-0.35);
 
-		this.m_player.add(this.m_farmer_arm_1);
-		this.m_player.add(this.m_farmer_arm_2);
+		this.m_arm_2 = new THREE.Object3D();
+		this.m_arm_2 =this.m_arm_1.clone();
+		this.m_arm_2.position.z=0.35;
+		this.m_arm_2.rotateY(Math.PI);
 
-		this.m_farmer_leg_1 = new THREE.Object3D();
-		this.m_farmer_leg_1 = Player.#model_leg;
-		this.m_farmer_leg_1.position.set(0,-0.5,-0.35);
+		this.m_body.add(this.m_arm_1);
+		this.m_body.add(this.m_arm_2);
 
-		this.m_farmer_leg_2 = new THREE.Object3D();
-		this.m_farmer_leg_2 = this.m_farmer_leg_1.clone();
-		this.m_farmer_leg_2.position.z=0.35;
+		this.m_leg_1 = new THREE.Object3D();
+		this.m_leg_1 = Player.#model_leg;
+		this.m_leg_1.position.set(0,-0.5,-0.35);
 
-		this.m_player.add(this.m_farmer_leg_1);
-		this.m_player.add(this.m_farmer_leg_2);
+		this.m_leg_2 = new THREE.Object3D();
+		this.m_leg_2 = this.m_leg_1.clone();
+		this.m_leg_2.position.z=0.35;
+
+		this.m_body.add(this.m_leg_1);
+		this.m_body.add(this.m_leg_2);
+
+		this.m_player.add(this.m_body);
 
 		this.m_player.position.set(x*3,1.5,-z*3);
 		scene.add(this.m_player);
 
 		this.a_walk = new TWEEN.Tween(this.m_player.position);
 		this.a_rot_y = new TWEEN.Tween(this.m_player.rotation);
-		this.a_rot_y.chain(this.a_walk);
+		this.a_rot_x = new TWEEN.Tween(this.m_body.rotation);
+		this.a_rot_y.chain(this.a_walk,this.a_rot_x);
 	}
 
 	move(dir)
@@ -85,7 +91,7 @@ class Player {
 					case 'up':
 						changex= -3;
 
-						if(this.last_rot=='left')
+						if(this.last_rot=="left")
 							new_rot=-Math.PI/2;
 						else if(this.last_rot=='right')
 							new_rot=Math.PI/2;
@@ -124,16 +130,22 @@ class Player {
 				this.last_rot = dir;
 
 				this.a_walk.from(this.m_player.position);	
-				this.a_walk.to( {x:pos.x+changex,y:pos.y,z:pos.z+changez}, this.speed);
+				this.a_walk.to( {x:pos.x+changex,z:pos.z+changez}, this.speed);
+				
+				this.a_rot_x.from(this.m_body.rotation);
+				this.a_rot_x.to({x:[0.3,0,-0.3,0]},this.speed);
 
 				if(new_rot !=0)
 				{
 					this.a_rot_y.from(this.m_player.rotation);
-					this.a_rot_y.to({x:0,y:this.m_player.rotation.y+new_rot,z:0},this.speed/6);
+					this.a_rot_y.to({y:this.m_player.rotation.y+new_rot},this.speed/6);
 					this.a_rot_y.start();
 				}
 				else
+				{
 					this.a_walk.start();
+					this.a_rot_x.start();
+				}
 			}
 		}
 	}
