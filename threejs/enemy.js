@@ -1,4 +1,4 @@
-class Player {
+class Enemy {
 	static #model_body;
 	static #model_arm;
 	static #model_leg;
@@ -10,7 +10,7 @@ class Player {
 	new_place=[0,0];
 
 	speed=700;
-	last_rot='down';
+	last_rot='left';
 	moving = 0;
 
 	static loadModels()

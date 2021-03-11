@@ -3,12 +3,6 @@ var renderer, scene, camera;
 
 var player;
 
-class Enemy{
-
-}
-
-
-
 // Acciones
 init();
 loadScene();
@@ -30,10 +24,10 @@ function init() {
 
 	// Camara
 	var aspectRatio = window.innerWidth/window.innerHeight;
-	camera = new THREE.PerspectiveCamera( 75, aspectRatio, 0.1, 100 );	// Perspectiva
+	camera = new THREE.PerspectiveCamera( 55, aspectRatio, 0.1, 100 );	// Perspectiva
 	//camera = new THREE.OrthographicCamera( -10,10, 10/aspectRatio, -10/aspectRatio, 0.1, 100); //Ortografica
-	camera.position.set( 18, 25, -18 );
-	camera.lookAt( new THREE.Vector3( 12,0,-18 ) );
+	camera.position.set( 30, 30, -18 );
+	camera.lookAt( new THREE.Vector3( 14,0,-18 ) );
 
 		// Control de camara
 		//cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -159,7 +153,7 @@ function setupKeyControls() {
 
 		case 13: 
 			player = new Player();
-			player.loadPlayer(5,6,scene);
+			player.loadPlayer(5,6,scene,grid_pruebas);
 		break;
 		case 37:
 			player.move('left');
@@ -174,5 +168,5 @@ function setupKeyControls() {
 			player.move('down');
 		break;
 	  }
-	}; // HACEER ROTACIONNNNNN
+	};
   }
