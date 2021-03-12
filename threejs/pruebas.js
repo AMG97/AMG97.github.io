@@ -30,9 +30,9 @@ function init() {
 	camera.lookAt( new THREE.Vector3( 14,0,-18 ) );
 
 		// Control de camara
-		//cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
-		//cameraControls.target.set(12,0,-22 );
-		//cameraControls.noZoom = false;
+		cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
+		cameraControls.target.set(12,0,-22 );
+		cameraControls.noZoom = false;
 
 	// Atender al eventos
 	window.addEventListener( 'resize', updateAspectRatio );
@@ -151,10 +151,15 @@ function setupKeyControls() {
 	document.onkeydown = function(e) {
 	  switch (e.keyCode) {
 
-		case 13: 
-			player = new Player();
-			player.loadPlayer(5,6,scene,grid_pruebas);
+		case 13: //ENTER
+			player = new Player(1,3,scene,grid_pruebas);
+			new Carrot(4,4,scene,grid_pruebas);
 		break;
+
+		case 32:
+			player.modifyHay();
+		break;
+
 		case 37:
 			player.move('left');
 		break;

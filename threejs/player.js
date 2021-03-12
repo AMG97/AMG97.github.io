@@ -9,7 +9,7 @@ class Player {
 	last_place=[0,0];
 	new_place=[0,0];
 
-	speed=700;
+	speed=500;
 	last_rot='down';
 	moving = 0;
 
@@ -39,7 +39,7 @@ class Player {
 		});
 	}
 
-	loadPlayer(x,z,scene,matrix)
+	constructor(x,z,scene,matrix)
 	{
 		this.m_player = new THREE.Object3D();
 
@@ -70,13 +70,13 @@ class Player {
 		this.m_body.add(this.m_leg_2);
 
 		this.m_player.add(this.m_body);
-		this.m_player.scale.set(1.2,1.2,1.2);
+		this.m_player.scale.set(1,0.9,0.9);
 
-		this.m_player.position.set(x*3,1.7,-z*3);
+		this.m_player.position.set(x*grid_size,1.29,-z*grid_size);
 		this.matrix=matrix;
-		this.matrix.changePosition(z,x,grid_player);
-		this.last_place=[z,x];
-		this.new_place=[z,x];
+		this.matrix.changePosition(x,z,grid_player);
+		this.last_place=[x,z];
+		this.new_place=[x,z];
 
 		scene.add(this.m_player);
 
@@ -91,6 +91,75 @@ class Player {
 		this.a_arm_1 = new TWEEN.Tween(this.m_arm_1.rotation);
 		this.a_arm_2 = new TWEEN.Tween(this.m_arm_2.rotation);
 		//this.a_rot_y.chain(this.a_walk,this.a_rot_x,this.a_leg_1,this.a_leg_2,this.a_arm_1,this.a_arm_2);
+	}
+
+	modifyHay()
+	{
+		if (!this.moving)
+		{
+			var mod_pos=[0,0];
+			switch (this.last_rot)
+			{
+				case 'up':
+					mod_pos[0]--;
+				break;
+				case 'down':
+					mod_pos[0]++;
+				break;
+				case 'left':
+					mod_pos[1]--;
+				break;
+				case 'right':
+					mod_pos[1]++;
+				break;
+			}
+			var hay_pos = [mod_pos[0] + this.new_place[0],mod_pos[1] + this.new_place[1]];
+			var state_pos = this.matrix.checkPosition(hay_pos[0],hay_pos[1]);
+
+			if(state_pos == grid_empty)
+			{
+				this.createHay(this.new_place,mod_pos);
+			}
+			else if (state_pos == grid_hay)
+			{
+				this.deleteHay(this.new_place,mod_pos);
+			}
+		}
+		
+	}
+
+	createHay(pos, mod_pos)
+	{
+		var new_pos = [mod_pos[0] + pos[0],mod_pos[1] + pos[1]];
+		var state_pos = this.matrix.checkPosition(new_pos[0],new_pos[1]);
+
+		if(state_pos == grid_empty)
+		{
+			this.moving=true;
+			new Hay(new_pos[0],new_pos[1],scene,this.matrix);
+			setTimeout(()=>{
+				this.createHay(new_pos,mod_pos);
+			},Hay.anim_speed);
+		}
+		else
+			this.moving=false;
+	}
+
+	deleteHay(pos, mod_pos)
+	{
+		var new_pos = [mod_pos[0] + pos[0],mod_pos[1] + pos[1]];
+		var state_pos = this.matrix.checkPosition(new_pos[0],new_pos[1]);
+
+		if(state_pos == grid_hay)
+		{
+			this.moving=true;
+			this.matrix.deleteObject(new_pos[0],new_pos[1]);
+			setTimeout(()=>{
+				this.deleteHay(new_pos,mod_pos);
+			},Hay.anim_speed);
+		}
+		else
+			this.moving=false;
 	}
 
 	move(dir)
@@ -109,8 +178,8 @@ class Player {
 				{
 					case 'up':
 
-						this.new_place[1] --;
-						changex= -3;
+						this.new_place[0] --;
+						changex= -grid_size;
 
 						if(this.last_rot=="left")
 							new_rot=-Math.PI/2;
@@ -120,8 +189,8 @@ class Player {
 							new_rot=Math.PI;
 					break;
 					case 'down':
-						this.new_place[1] ++;
-						changex= 3;
+						this.new_place[0] ++;
+						changex= grid_size;
 						if(this.last_rot=='left')
 							new_rot=Math.PI/2;
 						else if(this.last_rot=='right')
@@ -130,8 +199,8 @@ class Player {
 							new_rot=Math.PI;
 					break;
 					case 'left':
-						this.new_place[0] --;
-						changez=3;
+						this.new_place[1] --;
+						changez=grid_size;
 						if(this.last_rot=='up')
 							new_rot=Math.PI/2;
 						else if(this.last_rot=='down')
@@ -140,8 +209,8 @@ class Player {
 							new_rot=Math.PI;
 					break;
 					case 'right':
-						this.new_place[0] ++;
-						changez=-3;
+						this.new_place[1] ++;
+						changez=-grid_size;
 						if(this.last_rot=='up')
 							new_rot=-Math.PI/2;
 						else if(this.last_rot=='down')
@@ -155,7 +224,7 @@ class Player {
 
 				this.last_rot = dir;
 
-				if (state_pos == grid_no)
+				if (state_pos == grid_no || state_pos == grid_hay)
 				{
 					this.new_place=this.last_place.slice();
 					
@@ -203,10 +272,18 @@ class Player {
 						setTimeout(()=>{
 
 							setTimeout(()=>{
-								this.matrix.changePosition(this.last_place[0],this.last_place[1],grid_empty);
-								this.matrix.changePosition(this.new_place[0],this.new_place[1],grid_player);
+								if(this.matrix.checkPosition(this.new_place[0],this.new_place[1]) == grid_carrot)
+								{
+									this.matrix.deleteCarrot(this.new_place[0],this.new_place[1]);
+
+
+									//AQUI HABRIA QUE COMPROBAR SI QUEDAN ZANAHORIAS, SI NO QUEDAN HAS GANAO
+								}
+
+								this.matrix.changePosition(this.last_place[0],this.last_place[1],grid_empty,"");
+								this.matrix.changePosition(this.new_place[0],this.new_place[1],grid_player,this);
 								this.last_place=this.new_place.slice();
-							},this.speed/7/2);
+							},this.speed/2);
 
 							this.a_walk.start();
 							this.a_rot_x.start();
@@ -221,10 +298,19 @@ class Player {
 					{
 						this.moving=1;
 						setTimeout(()=>{
+							if(this.matrix.checkPosition(this.new_place[0],this.new_place[1]) == grid_carrot)
+							{
+								this.matrix.deleteCarrot(this.new_place[0],this.new_place[1]);
+
+
+								//AQUI HABRIA QUE COMPROBAR SI QUEDAN ZANAHORIAS, SI NO QUEDAN HAS GANAO
+							}
+
 							this.matrix.changePosition(this.last_place[0],this.last_place[1],grid_empty);
 							this.matrix.changePosition(this.new_place[0],this.new_place[1],grid_player);
 							this.last_place=this.new_place.slice();
-						},this.speed/7/2);
+
+						},this.speed/2);
 						this.a_walk.start();
 						this.a_rot_x.start();
 						this.a_leg_1.start();
