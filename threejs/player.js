@@ -9,7 +9,7 @@ class Player {
 	last_place=[0,0];
 	new_place=[0,0];
 
-	speed=500;
+	speed=400;
 	last_rot='down';
 	moving = 0;
 
@@ -83,9 +83,6 @@ class Player {
 		this.a_walk = new TWEEN.Tween(this.m_player.position);
 		this.a_rot_y = new TWEEN.Tween(this.m_player.rotation);
 		this.a_rot_x = new TWEEN.Tween(this.m_body.rotation);
-		this.a_rot_x.onComplete(()=>{
-			this.moving=0;
-		})
 		this.a_leg_1 = new TWEEN.Tween(this.m_leg_1.rotation);
 		this.a_leg_2 = new TWEEN.Tween(this.m_leg_2.rotation);
 		this.a_arm_1 = new TWEEN.Tween(this.m_arm_1.rotation);
@@ -133,7 +130,7 @@ class Player {
 		var new_pos = [mod_pos[0] + pos[0],mod_pos[1] + pos[1]];
 		var state_pos = this.matrix.checkPosition(new_pos[0],new_pos[1]);
 
-		if(state_pos == grid_empty)
+		if(state_pos == grid_empty || state_pos == grid_carrot)
 		{
 			this.moving=true;
 			new Hay(new_pos[0],new_pos[1],scene,this.matrix);
@@ -150,7 +147,7 @@ class Player {
 		var new_pos = [mod_pos[0] + pos[0],mod_pos[1] + pos[1]];
 		var state_pos = this.matrix.checkPosition(new_pos[0],new_pos[1]);
 
-		if(state_pos == grid_hay)
+		if(state_pos == grid_hay || state_pos == grid_hay_carrot)
 		{
 			this.moving=true;
 			this.matrix.deleteObject(new_pos[0],new_pos[1]);
@@ -160,6 +157,11 @@ class Player {
 		}
 		else
 			this.moving=false;
+	}
+
+	getPos()
+	{
+		return this.new_place;
 	}
 
 	move(dir)
@@ -267,7 +269,7 @@ class Player {
 					{
 						this.moving=1;
 						this.a_rot_y.from(this.m_player.rotation);
-						this.a_rot_y.to({y:this.m_player.rotation.y+new_rot},this.speed/7);
+						this.a_rot_y.to({y:this.m_player.rotation.y+new_rot},this.speed/5);
 						this.a_rot_y.start();
 						setTimeout(()=>{
 
@@ -291,7 +293,10 @@ class Player {
 							this.a_leg_2.start();
 							this.a_arm_1.start();
 							this.a_arm_2.start();
-						},this.speed/7);
+							setTimeout(()=>{
+								this.moving=0;
+							},this.speed);
+						},this.speed/5);
 						
 					}
 					else
@@ -317,6 +322,9 @@ class Player {
 						this.a_leg_2.start();
 						this.a_arm_1.start();
 						this.a_arm_2.start();
+						setTimeout(()=>{
+							this.moving=0;
+						},this.speed);
 					}
 				}
 			}

@@ -35,7 +35,19 @@ class Grid {
     {
         if(x>=0 &&x <= this.#limit_x && y>=0 && y<=this.#limit_y)
         {
-            this.matrix[x][y].value=i;
+            if(i == grid_hay &&  this.matrix[x][y].value==grid_carrot){
+                this.matrix[x][y].value=grid_hay_carrot;
+                this.matrix[x][y].carrot.animPause();
+            }
+            else if(i == grid_enemy && this.matrix[x][y].value==grid_carrot){
+                this.matrix[x][y].carrot.animDown();
+            }
+            else if(i == grid_empty && this.matrix[x][y].carrot!=""){
+                this.matrix[x][y].carrot.animUp();
+                this.matrix[x][y].value=grid_carrot;
+            }
+            else
+                this.matrix[x][y].value=i;
             this.matrix[x][y].object=object;
         }
     }
@@ -44,10 +56,18 @@ class Grid {
     {
         if(x>=0 &&x <= this.#limit_x && y>=0 && y<=this.#limit_y)
         {
+            if(this.matrix[x][y].value==grid_hay_carrot)
+            {
+                this.matrix[x][y].value=grid_carrot;
+                this.matrix[x][y].carrot.animResume();
+            }
+            else
+            {
+                this.matrix[x][y].value=grid_empty;
+            }
             this.matrix[x][y].object.destroy();
             delete this.matrix[x][y].object;
             this.matrix[x][y].object="";
-            this.matrix[x][y].value=grid_empty;
         }
     }
 
