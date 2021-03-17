@@ -55,8 +55,8 @@ function init() {
 
 	// Camara
 	var aspectRatio = window.innerWidth/window.innerHeight;
-	camera = new THREE.PerspectiveCamera( 75, aspectRatio, 0.1, 100 );	// Perspectiva
-	//camera = new THREE.OrthographicCamera( -10,10, 10/aspectRatio, -10/aspectRatio, 0.1, 100); //Ortografica
+	//camera = new THREE.PerspectiveCamera( 75, aspectRatio, 0.1, 100 );	// Perspectiva
+	camera = new THREE.OrthographicCamera( -10,10, 10/aspectRatio, -10/aspectRatio, 0.1, 100); //Ortografica
 	camera.position.set( 0.5, 2, 5 );
 	camera.lookAt( new THREE.Vector3( 0,0,0 ) );
     scene.add(camera);
@@ -74,26 +74,30 @@ function init() {
     scene.add(minicam);
     // .............................................................
 
-	// Luces
-	var ambiental = new THREE.AmbientLight(0x222222);
-	scene.add(ambiental);
+	// Luces 
+	//direccional = new THREE.Focal
 
-	var direccional = new THREE.DirectionalLight( 0xFFFFFF, 0.2 );
-	direccional.position.set( 0,1,0 );
+	/*// FUNCIONA MEDIO BIEN LO DE LAS SOMBRAS CON ESTO
+	var direccional = new THREE.DirectionalLight( 0xFFFFFF, 1);
+	direccional.position.set( 0,5,1 );
+	direccional.castShadow = true;
+	direccional.shadow.camera.far = 3500;
+
+
+	direccional.shadow.mapSize.width = 2048;
+	direccional.shadow.mapSize.height = 2048;
+
+	const d = 80;
+
+	direccional.shadow.camera.left = - d;
+	direccional.shadow.camera.right = d;
+	direccional.shadow.camera.top = d;
+	direccional.shadow.camera.bottom = - d;*/
+
 	scene.add( direccional );
 
-	var puntual = new THREE.PointLight( 0xFFFFFFF, 0.3 );
-	puntual.position.set( 2, 7, -4 );
-	scene.add( puntual );
 
-	var focal = new THREE.SpotLight( 0xFFFFFF, 0.5 );
-	focal.position.set( -2, 7, 4 );
-	focal.target.position.set( 0,0,0 );
-	focal.angle = Math.PI/7;
-	focal.penumbra = 0.5;
-	focal.castShadow = true;
-
-	scene.add( focal );
+	//scene.add( focal );
 
 	// Atender al eventos
 	window.addEventListener( 'resize', updateAspectRatio );
@@ -165,21 +169,18 @@ function loadScene() {
 	esfera = new THREE.Mesh( geoEsfera, matEsfera );
     esfera.name = 'esfera';
 	esfera.receiveShadow = esfera.castShadow = true;
+//Entorno
+var m_grass, m_fence;
+	const gltfloader = new THREE.GLTFLoader();
+	gltfloader.load ('models/environment/ground.glb', function ( grass_gltf){
+				m_grass = grass_gltf.scene.children[0];
+				m_grass.receiveShadow = true;
 
-	// Suelo
-	var texSuelo = new THREE.TextureLoader().load(path+"r_256.jpg");
-	texSuelo.minFilter = THREE.LinearFilter;
-	texSuelo.magFilter = THREE.LinearFilter;
-	texSuelo.repeat.set( 2,3 );
-	texSuelo.wrapS = texSuelo.wrapT = THREE.MirroredRepeatWrapping;
+				scene.add(m_grass);
 
-	var geoSuelo = new THREE.PlaneGeometry(10,10,100,100);
-	var matSuelo = new THREE.MeshLambertMaterial( {color:'gray', map:texSuelo} );
-	var suelo = new THREE.Mesh( geoSuelo, matSuelo );
-    suelo.name = 'suelo';
-	suelo.rotation.x = -Math.PI/2;
-	suelo.position.y = -0.1;
-	suelo.receiveShadow = true;
+	});
+
+
 
 	// Objeto importado
 	var loader = new THREE.ObjectLoader();
@@ -187,7 +188,6 @@ function loadScene() {
 		         function (objeto){
                     objeto.name = 'soldado';
 		         	objeto.position.y = 1;
-		         	cubo.add(objeto);
 					var txsoldado = new THREE.TextureLoader().load('models/soldado/soldado.png');
 					objeto.material.setValues({map:txsoldado});
 					objeto.castShadow = true;
@@ -206,6 +206,10 @@ function loadScene() {
 		         	volver.to( {x:0,y:1,z:0}, 2000);
 		         	//salto.chain( volver );
 		         	//volver.chain( salto );
+
+					 scene.add(objeto);
+					 objeto.rotation.set(0,Math.PI,0);
+					 objeto.scale.set(5,5,5);
 
 		         });
 
@@ -248,12 +252,27 @@ function loadScene() {
     habitacion.name = 'habitacion';
 
 	// Grafo
-	conjunto.add( cubo );
-	conjunto.add( esfera );
-	scene.add( conjunto );
 	scene.add( new THREE.AxesHelper(3) );
-	scene.add( suelo );
-	scene.add( habitacion );
+
+var m_fence;
+	gltfloader.load( 'models/environment/fence.glb', function ( fence_gltf ) {	
+
+		m_fence = fence_gltf.scene;
+		m_fence.position.y=2;
+
+		m_fence.traverse( function( child ) { 
+
+			if ( child.isMesh ) {
+		
+				child.castShadow = true;
+		
+			}
+		});
+		m_fence.castShadow = true;
+
+		scene.add(m_fence);
+
+	});
 }
 
 function updateAspectRatio()
@@ -264,10 +283,10 @@ function updateAspectRatio()
 	// Renovar medidas de viewport
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	// Para la perspectiva
-	camera.aspect = aspectRatio;
-	// Para la ortografica
-	// camera.top = 10/aspectRatio;
-	// camera.bottom = -10/aspectRatio;
+	//camera.aspect = aspectRatio;
+	//Para la ortografica
+	 camera.top = 10/aspectRatio;
+	 camera.bottom = -10/aspectRatio;
 
 	// Hay que actualizar la matriz de proyeccion
 	camera.updateProjectionMatrix();

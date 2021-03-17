@@ -7,6 +7,9 @@ grid_carrot = 4;
 grid_hay_carrot = 5;
 grid_enemy_carrot =6;
 
+win=0;
+lose=0;
+
 grid_size=2;
 
 class Grid {
@@ -21,6 +24,7 @@ class Grid {
                 this.matrix[i][j]={value:grid_empty,object:"",carrot:""};
             }
         }
+        this.carrots=0;
     }
 
     checkPosition(x,y)
@@ -46,6 +50,11 @@ class Grid {
                 this.matrix[x][y].carrot.animUp();
                 this.matrix[x][y].value=grid_carrot;
             }
+            else if(i == grid_player && this.matrix[x][y].value==grid_carrot){
+                this.deleteCarrot(x,y);
+                if(this.carrots == 0)
+                    win = true;
+            }
             else
                 this.matrix[x][y].value=i;
             this.matrix[x][y].object=object;
@@ -65,9 +74,12 @@ class Grid {
             {
                 this.matrix[x][y].value=grid_empty;
             }
-            this.matrix[x][y].object.destroy();
-            delete this.matrix[x][y].object;
-            this.matrix[x][y].object="";
+            if(this.matrix[x][y].object != "" && this.matrix[x][y].object != undefined)
+            {
+                this.matrix[x][y].object.destroy();
+                delete this.matrix[x][y].object;
+                this.matrix[x][y].object="";
+            }
         }
     }
 
@@ -76,6 +88,7 @@ class Grid {
         if(x>=0 &&x <= this.#limit_x && y>=0 && y<=this.#limit_y)
         {
             this.matrix[x][y].carrot=carrot;
+            this.carrots ++;
             var state = this.checkPosition(x,y);
             if(state == grid_empty)
             {
@@ -92,6 +105,7 @@ class Grid {
     {
         if(x>=0 &&x <= this.#limit_x && y>=0 && y<=this.#limit_y)
         {
+            this.carrots --;
             this.matrix[x][y].carrot.destroy();
             delete this.matrix[x][y].carrot;
             this.matrix[x][y].carrot="";
@@ -99,7 +113,18 @@ class Grid {
         }
     }
 
+    deleteAll()
+    {
+        for(var i=0;i<=this.#limit_x;i++){
+            for(var j=0;j<=this.#limit_y;j++){
+                this.deleteObject(i,j);
+                if(this.matrix[i][j].carrot!="")
+                    this.deleteCarrot(i,j);
+            }
+        }
+    }
 
+    checkCarrots
 }
 
 var grid_pruebas = new Grid();

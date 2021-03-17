@@ -9,6 +9,9 @@ class Carrot {
 		gltfloader.load( 'models/objects/carrot.glb', function ( carrot_gltf ) {
 			Carrot.#model_carrot = new THREE.Object3D();
 			Carrot.#model_carrot = carrot_gltf.scene;
+			Carrot.#model_carrot.traverse(function(child){
+				child.castShadow = true;
+			});
 		}, undefined, function (error){
 			console.error(error);
 		});
@@ -19,7 +22,7 @@ class Carrot {
 		this.m_carrot = new THREE.Object3D();
 		this.m_carrot = Carrot.#model_carrot.clone();
 
-		this.m_carrot.position.set(x*grid_size,0.2,-z*grid_size);
+		this.m_carrot.position.set(x*grid_size,0.9,-z*grid_size);
 		this.m_carrot.scale.set(0.8,0.8,0.8);
 		this.matrix=matrix;
 		this.matrix.addCarrot(x,z,this);
@@ -34,14 +37,14 @@ class Carrot {
 					.start();
 
 		this.a_pos = new TWEEN.Tween(this.m_carrot.position)
-					.to({y:[0.7,0.2]},Carrot.anim_speed/1.2)
+					.to({y:[0.4,0.9]},Carrot.anim_speed/1.2)
 					.repeat(Infinity)
 					.start();
 
 		this.a_down = new TWEEN.Tween(this.m_carrot.position)
-					.to({y:'-'+1.2},Cow.speed/2);
+					.to({y:'-'+1.4},Cow.speed/2);
 		this.a_up = new TWEEN.Tween(this.m_carrot.position)
-					.to({y:'+'+1.2},Cow.speed/2);
+					.to({y:'+'+1.4},Cow.speed/2);
 
 	}
 

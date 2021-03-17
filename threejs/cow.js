@@ -9,7 +9,7 @@ class Cow {
 	last_place=[0,0];
 	new_place=[0,0];
 
-	static speed=800;
+	static speed=750;
 	last_rot='left';
 	moving = 0;
 
@@ -22,15 +22,20 @@ class Cow {
 
 				gltfloader.load('models/cow/cow_tail.glb', function (cow_tail_gltf){
 
-
-					Cow.#model_body = new THREE.Object3D();
 					Cow.#model_body = cow_gltf.scene;
+					Cow.#model_body.traverse(function(child){
+						child.castShadow = true;
+					});
 
-					Cow.#model_leg = new THREE.Object3D();
 					Cow.#model_leg = cow_leg_gltf.scene;
+					Cow.#model_leg.traverse(function(child){
+						child.castShadow = true;
+					});
 
-					Cow.#model_tail = new THREE.Object3D();
 					Cow.#model_tail = cow_tail_gltf.scene;
+					Cow.#model_tail.traverse(function(child){
+						child.castShadow = true;
+					});
 
 				});
 			});
@@ -43,29 +48,23 @@ class Cow {
 	{
 		this.m_cow = new THREE.Object3D();
 
-		this.m_body = new THREE.Object3D();
 		this.m_body = Cow.#model_body.clone();
 
-		this.m_tail= new THREE.Object3D();
 		this.m_tail = Cow.#model_tail.clone();
 		this.m_tail.position.z=-0.95;
 		this.m_tail.position.y=0.15;
 
-		this.m_leg_1 = new THREE.Object3D();
 		this.m_leg_1 = Cow.#model_leg.clone();
 		this.m_leg_1.position.x=0.5;
 		this.m_leg_1.position.y=-0.5;
 
-		this.m_leg_2 = new THREE.Object3D();
 		this.m_leg_2 = this.m_leg_1.clone();
 		this.m_leg_2.position.x=-0.48;
 		this.m_leg_2.rotation.y=Math.PI;
 
-		this.m_leg_3 = new THREE.Object3D();
 		this.m_leg_3 = this.m_leg_1.clone();
 		this.m_leg_3.position.z=-0.75;
 
-		this.m_leg_4 = new THREE.Object3D();
 		this.m_leg_4 = this.m_leg_3.clone();
 		this.m_leg_4.position.x=-0.48;
 		this.m_leg_4.rotation.y=Math.PI;
@@ -82,11 +81,13 @@ class Cow {
 
 		this.m_cow.position.set(x*grid_size,1.2,-z*grid_size);
 		this.matrix=matrix;
-		this.matrix.changePosition(x,z,grid_enemy);
+		this.matrix.changePosition(x,z,grid_enemy,this);
 		this.last_place=[x,z];
 		this.new_place=[x,z];
 
-		scene.add(this.m_cow);
+		this.scene = scene;
+
+		this.scene.add(this.m_cow);
 
 		this.a_walk = new TWEEN.Tween(this.m_cow.position);
 		this.a_rot_y = new TWEEN.Tween(this.m_cow.rotation);
@@ -120,10 +121,16 @@ class Cow {
 		this.last_rot=dir;
 	}
 
+	destroy()
+	{
+		this.scene.remove(this.m_cow);
+	}
+
 	move(player_pos)
 	{	
 		if(this.m_cow)
 		{
+			this.player_pos = player_pos;
 			if(!this.moving)
 			{
 				var pos = this.m_cow.position;
@@ -196,15 +203,29 @@ class Cow {
 
 				var state_pos = this.matrix.checkPosition(this.new_place[0],this.new_place[1]);
 
+
 				if (state_pos == grid_hay || state_pos == grid_hay_carrot)
 				{
 					this.moving=true;
-					this.matrix.deleteObject(this.new_place[0],this.new_place[1]);
+					setTimeout(()=>{
+						this.matrix.deleteObject(this.new_place[0],this.new_place[1]);
+						this.new_place=this.last_place.slice();
+						this.last_rot=previous_last_rot;
+					},200);
 					setTimeout(()=>{
 						this.moving=false;
-					},Hay.anim_speed+100);
-					this.new_place=this.last_place.slice();
-					this.last_rot=previous_last_rot;
+					},Hay.anim_speed+200);
+				}
+
+				
+				else if (state_pos == grid_enemy)
+				{
+					this.moving = true;
+					setTimeout(()=>{
+						this.new_place=this.last_place.slice();
+						this.last_rot=previous_last_rot;
+						this.moving=false;
+					},Cow.speed);
 				}
 
 				else{
@@ -240,8 +261,13 @@ class Cow {
 						setTimeout(()=>{
 							setTimeout(()=>{
 								this.matrix.changePosition(this.last_place[0],this.last_place[1],grid_empty,"");
-								this.matrix.changePosition(this.new_place[0],this.new_place[1],grid_enemy,this);
+								if((this.player_pos[0] == this.new_place[0] && this.player_pos[1] == this.new_place[1])
+									||(this.player_pos[0] == this.last_place[0] && this.player_pos[1] == this.last_place[1]))
+								{
+									lose=1;
+								}
 								this.last_place=this.new_place.slice();
+
 							},Cow.speed/2);
 
 							this.a_walk.start();
@@ -251,7 +277,7 @@ class Cow {
 							this.a_leg_3.start();
 							this.a_leg_4.start();
 							this.a_tail.start();
-						},this.Cow/3);
+						},Cow.speed/3);
 						
 					}
 					else
@@ -259,8 +285,13 @@ class Cow {
 						this.moving=1;
 						this.matrix.changePosition(this.new_place[0],this.new_place[1],grid_enemy,this);
 						setTimeout(()=>{
-							this.matrix.changePosition(this.last_place[0],this.last_place[1],grid_empty);
-							this.matrix.changePosition(this.new_place[0],this.new_place[1],grid_enemy);
+							this.matrix.changePosition(this.last_place[0],this.last_place[1],grid_empty,"");
+							this.matrix.changePosition(this.last_place[0],this.last_place[1],grid_empty,"");
+							if((this.player_pos[0] == this.new_place[0] && this.player_pos[1] == this.new_place[1])
+								||(this.player_pos[0] == this.last_place[0] && this.player_pos[1] == this.last_place[1]))
+							{
+								lose=1;
+							}
 							this.last_place=this.new_place.slice();
 
 						},Cow.speed/2);

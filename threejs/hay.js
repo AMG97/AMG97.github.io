@@ -1,13 +1,15 @@
 class Hay {
 	static #model_hay;
-	static anim_speed=150;
+	static anim_speed=100;
 
 	static loadModels()
 	{
 		const gltfloader = new THREE.GLTFLoader();
 		gltfloader.load( 'models/objects/hay.glb', function ( hay_gltf ) {
-			Hay.#model_hay = new THREE.Object3D();
 			Hay.#model_hay = hay_gltf.scene;
+			Hay.#model_hay.traverse(function(child){
+				child.castShadow = true;
+			});
 		}, undefined, function (error){
 			console.error(error);
 		});
@@ -15,7 +17,6 @@ class Hay {
 
 	constructor(x,z,scene,matrix)
 	{
-		this.m_hay = new THREE.Object3D();
 		this.m_hay = Hay.#model_hay.clone();
 
 		this.m_hay.position.set(x*grid_size,0,-z*grid_size);
