@@ -10,6 +10,7 @@ class Hay {
 			Hay.#model_hay.traverse(function(child){
 				child.castShadow = true;
 			});
+			create_hay = new Hay(7,22,"");
 		}, undefined, function (error){
 			console.error(error);
 		});
@@ -17,19 +18,33 @@ class Hay {
 
 	constructor(x,z,scene,matrix)
 	{
-		this.m_hay = Hay.#model_hay.clone();
+		if(scene != "")
+		{
+			this.m_hay = Hay.#model_hay.clone();
 
-		this.m_hay.position.set(x*grid_size,0,-z*grid_size);
-		this.matrix=matrix;
-		this.matrix.changePosition(x,z,grid_hay,this);
+			this.m_hay.position.set(x*grid_size,0,-z*grid_size);
+			this.matrix=matrix;
+			this.matrix.changePosition(x,z,grid_hay,this);
 
-		this.m_hay.scale.set(0,0,0);
-		this.scene=scene;
-		this.scene.add(this.m_hay);
+			this.m_hay.scale.set(0,0,0);
+			this.scene=scene;
+			this.scene.add(this.m_hay);
 
-		this.a_grow = new TWEEN.Tween(this.m_hay.scale)
-					.to({x:0.9,y:0.9,z:0.9},Hay.anim_speed);
-		this.a_grow.start();		
+			this.a_grow = new TWEEN.Tween(this.m_hay.scale)
+						.to({x:0.9,y:0.9,z:0.9},Hay.anim_speed);
+			this.a_grow.start();	
+		}	
+		else
+		{
+			this.m_hay = Hay.#model_hay.clone();
+			this.m_hay.traverse(function(child){
+				child.name = "hay";
+			});
+			this.m_hay.name="hay";
+	
+			this.m_hay.position.set(x*grid_size,0,-z*grid_size);
+		}
+
 	}
 
 	destroy()

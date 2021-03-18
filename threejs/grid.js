@@ -7,8 +7,10 @@ grid_carrot = 4;
 grid_hay_carrot = 5;
 grid_enemy_carrot =6;
 
-win=0;
-lose=0;
+var win=0;
+var lose=0;
+
+var create_player, create_carrot, create_hay, create_cow, create_selected;
 
 grid_size=2;
 

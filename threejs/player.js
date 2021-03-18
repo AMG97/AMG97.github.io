@@ -37,6 +37,8 @@ class Player {
 						child.castShadow = true;
 					});
 
+					create_player = new Player(3,22,"");
+
 				});
 			});
 		}, undefined, function (error){
@@ -46,51 +48,91 @@ class Player {
 
 	constructor(x,z,scene,matrix)
 	{
-		this.m_player = new THREE.Object3D();
+		if(scene != "")
+		{
+			this.m_player = new THREE.Object3D();
 
-		this.m_body = Player.#model_body.clone();
+			this.m_body = Player.#model_body.clone();
 
-		this.m_arm_1 = Player.#model_arm.clone();
-		this.m_arm_1.position.set(-0.1,0.45,-0.35);
-		
+			this.m_arm_1 = Player.#model_arm.clone();
+			this.m_arm_1.position.set(-0.1,0.45,-0.35);
+			
 
-		this.m_arm_2 =this.m_arm_1.clone();
-		this.m_arm_2.position.z=0.35;
-		this.m_arm_2.rotation.y=Math.PI;
+			this.m_arm_2 =this.m_arm_1.clone();
+			this.m_arm_2.position.z=0.35;
+			this.m_arm_2.rotation.y=Math.PI;
 
-		this.m_body.add(this.m_arm_1);
-		this.m_body.add(this.m_arm_2);
+			this.m_body.add(this.m_arm_1);
+			this.m_body.add(this.m_arm_2);
 
-		this.m_leg_1 = Player.#model_leg;
-		this.m_leg_1.position.set(0,-0.5,-0.35);
+			this.m_leg_1 = Player.#model_leg;
+			this.m_leg_1.position.set(0,-0.5,-0.35);
 
-		this.m_leg_2 = this.m_leg_1.clone();
-		this.m_leg_2.position.z=0.35;
+			this.m_leg_2 = this.m_leg_1.clone();
+			this.m_leg_2.position.z=0.35;
 
-		this.m_body.add(this.m_leg_1);
-		this.m_body.add(this.m_leg_2);
+			this.m_body.add(this.m_leg_1);
+			this.m_body.add(this.m_leg_2);
 
-		this.m_player.add(this.m_body);
-		this.m_player.scale.set(1,0.9,0.9);
+			this.m_player.add(this.m_body);
+			this.m_player.scale.set(1,0.9,0.9);
 
-		this.m_player.position.set(x*grid_size,1.29,-z*grid_size);
-		this.matrix=matrix;
-		this.matrix.changePosition(x,z,grid_player);
-		this.last_place=[x,z];
-		this.new_place=[x,z];
+			this.m_player.position.set(x*grid_size,1.29,-z*grid_size);
+			this.matrix=matrix;
+			this.matrix.changePosition(x,z,grid_player);
+			this.last_place=[x,z];
+			this.new_place=[x,z];
 
-		this.scene = scene;
+			this.scene = scene;
 
-		this.scene.add(this.m_player);
+			this.scene.add(this.m_player);
 
-		this.a_walk = new TWEEN.Tween(this.m_player.position);
-		this.a_rot_y = new TWEEN.Tween(this.m_player.rotation);
-		this.a_rot_x = new TWEEN.Tween(this.m_body.rotation);
-		this.a_leg_1 = new TWEEN.Tween(this.m_leg_1.rotation);
-		this.a_leg_2 = new TWEEN.Tween(this.m_leg_2.rotation);
-		this.a_arm_1 = new TWEEN.Tween(this.m_arm_1.rotation);
-		this.a_arm_2 = new TWEEN.Tween(this.m_arm_2.rotation);
-		//this.a_rot_y.chain(this.a_walk,this.a_rot_x,this.a_leg_1,this.a_leg_2,this.a_arm_1,this.a_arm_2);
+			this.a_walk = new TWEEN.Tween(this.m_player.position);
+			this.a_rot_y = new TWEEN.Tween(this.m_player.rotation);
+			this.a_rot_x = new TWEEN.Tween(this.m_body.rotation);
+			this.a_leg_1 = new TWEEN.Tween(this.m_leg_1.rotation);
+			this.a_leg_2 = new TWEEN.Tween(this.m_leg_2.rotation);
+			this.a_arm_1 = new TWEEN.Tween(this.m_arm_1.rotation);
+			this.a_arm_2 = new TWEEN.Tween(this.m_arm_2.rotation);
+		}
+		else
+		{
+			this.m_body = Player.#model_body.clone();
+			this.m_body.traverse(function(child){
+				child.name="player";
+			});
+			this.m_body.name="player";
+
+			this.m_arm_1 = Player.#model_arm.clone();
+			this.m_arm_1.position.set(-0.1,0.45,-0.35);
+			this.m_arm_1.traverse(function(child){
+				child.name="player";
+			});
+			this.m_arm_1.name="player";
+
+			this.m_arm_2 =this.m_arm_1.clone();
+			this.m_arm_2.position.z=0.35;
+			this.m_arm_2.rotation.y=Math.PI;
+
+			this.m_body.add(this.m_arm_1);
+			this.m_body.add(this.m_arm_2);
+
+			this.m_leg_1 = Player.#model_leg;
+			this.m_leg_1.position.set(0,-0.5,-0.35);
+			this.m_leg_1.traverse(function(child){
+				child.name="player";
+			});
+			this.m_leg_1.name="player";
+
+			this.m_leg_2 = this.m_leg_1.clone();
+			this.m_leg_2.position.z=0.35;
+
+			this.m_body.add(this.m_leg_1);
+			this.m_body.add(this.m_leg_2);
+			this.m_body.scale.set(1,0.9,0.9);
+
+			this.m_body.position.set(x*grid_size,1.29,-z*grid_size);
+		}
 	}
 
 	modifyHay()

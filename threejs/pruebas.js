@@ -27,6 +27,7 @@ var m_grass, m_fence, m_ground;
 			  m_ground = ground_gltf.scene.children[0];
 
 			  m_ground.receiveShadow=true;
+			  m_ground.name="ground";
   
 			  m_fence = fence_gltf.scene.children[0];
 
@@ -45,7 +46,7 @@ var m_grass, m_fence, m_ground;
 material_text = new THREE.MeshPhongMaterial({color:0x49F03B, shininess: 0});
 
 var title, text_win, text_lose;
-var button_play;
+var button_play, button_create, effectControls;
 
 new THREE.FontLoader().load( "fonts/Alphakind_Regular.json",function(font){
 			//TITULO
@@ -66,18 +67,18 @@ new THREE.FontLoader().load( "fonts/Alphakind_Regular.json",function(font){
 			scene.add(title);
 
 			//BOTTON
-			var geo_title = new THREE.TextGeometry( 
-				'JUGAR',
+			var geo_play = new THREE.TextGeometry( 
+				'PROBAR',
 				{
 					size: 0.2,
 					height: 0.07,
 					font:font,
 
 				});
-			var play = new THREE.Mesh( geo_title, material_text);
-			play.position.set(-0.42,-0.1,0);
+			var play = new THREE.Mesh( geo_play, material_text);
+			play.position.set(-0.50,-0.1,0);
 		
-			var button_play_g = new THREE.BoxGeometry(1,0.4,0.1);
+			var button_play_g = new THREE.BoxGeometry(1.2,0.4,0.1);
 			button_play = new THREE.Mesh( button_play_g, material_button );
 			button_play.name = 'button_play';
 			button_play.position.z=0.1;
@@ -87,6 +88,27 @@ new THREE.FontLoader().load( "fonts/Alphakind_Regular.json",function(font){
 			scene.add(button_play);
 
 
+			var geo_create = new THREE.TextGeometry( 
+				'CREAR',
+				{
+					size: 0.2,
+					height: 0.07,
+					font:font,
+
+				});
+			var create = new THREE.Mesh( geo_create, material_text);
+			create.position.set(-0.4,-0.1,0);
+		
+			var button_create_g = new THREE.BoxGeometry(1.2,0.4,0.1);
+			button_create = new THREE.Mesh( button_create_g, material_button.clone() );
+			button_create.name = 'button_create';
+			button_create.position.z=0.1;
+			button_create.add(create);
+			button_create.position.y=-0.5;
+
+			scene.add(button_create);
+
+//-------------------------------------------------------------------------------------------
 
 			var geo_lose = new THREE.TextGeometry( 
 				'PERDISTE',
@@ -204,34 +226,173 @@ function buttonHover(event)
 		if( interseccion.length > 0){
 			if(interseccion[0].object.name == 'button_play'){
 				button_play.material.color.setHex( 0xE0A839 );
+				button_create.material.color.setHex( 0x1E5C1C );
+			}
+			else if (interseccion[0].object.name == 'button_create')
+			{
+				button_play.material.color.setHex( 0x1E5C1C );
+				button_create.material.color.setHex( 0xE0A839 );
 			}
 			else
 			{
 				button_play.material.color.setHex( 0x1E5C1C );
+				button_create.material.color.setHex( 0x1E5C1C );
 			}
 		}
-		else
+		/*else
 		{
 			button_play.material.color.setHex( 0x1E5C1C );
-		}
+			button_create.material.color.setHex( 0x1E5C1C );
+		}*/
 	}
 }
 
 function buttonClick(event)
 {
-	var x = event.clientX;
-    var y = event.clientY;
-	x = x * 2/window.innerWidth - 1;
-	y = -y * 2/window.innerHeight + 1;
-	var rayo = new THREE.Raycaster();
-	rayo.setFromCamera( new THREE.Vector2(x,y), camera);
+	if(state == "create")
+	{
+		//aqui hacer otro rayo recursivo y que compare 
+		//con los nombres cual es la cosa seleccionada, 
+		//para saber la que hay seleccionada tendré que tener otra variable
 
-	var interseccion = rayo.intersectObjects( scene.children, false );
-	if( interseccion.length > 0){
-		if(interseccion[0].object.name == 'button_play'){
-			loadPlay();
+		var x = event.clientX;
+		var y = event.clientY;
+
+		// Normalizar al espacio de 2x2 centrado
+		x = x * 2/window.innerWidth - 1;
+		y = -y * 2/window.innerHeight + 1;
+
+		// Construir el rayo que pasa por el punto de vista y el punto x,y
+		var rayo = new THREE.Raycaster();
+		rayo.setFromCamera( new THREE.Vector2(x,y), camera);
+
+		// Calcular interseccion con objetos de la escena
+		var interseccion = rayo.intersectObjects( scene.children, true );
+		if( interseccion.length > 0){
+			if (interseccion[0].object.name == "ground" && create_selected!=undefined)
+			{
+				console.log(interseccion[0].point);
+				console.log(create_selected);
+
+				var matrix_x = Math.round(interseccion[0].point.x/grid_size);
+				var matrix_z = Math.round(-interseccion[0].point.z/grid_size);
+
+				switch (create_selected)
+				{
+					case "player":
+						create_selected = undefined;
+						player = new Player(matrix_x, matrix_z,scene,grid_pruebas);
+						scene.remove(create_player.m_body);
+					break;
+					case "cow":
+						enemies.push(new Cow(matrix_x,matrix_z,"down",scene,grid_pruebas));
+					break;
+					case "hay":
+						new Hay(matrix_x,matrix_z,scene,grid_pruebas);
+					break;
+					case "carrot":
+						new Carrot(matrix_x,matrix_z,scene,grid_pruebas);
+					break;
+				}
+			}
+			else
+			{
+				switch (interseccion[0].object.name)
+				{
+					case "player":
+						create_selected = "player";
+					break;
+					case "cow":
+						create_selected = "cow";
+					break;
+					case "hay":
+						create_selected = "hay";
+					break;
+					case "carrot":
+						create_selected = "carrot";
+					break;
+				}
+			}
 		}
 	}
+	else if (state == "init_menu" || state == "playend_menu")
+		var x = event.clientX;
+		var y = event.clientY;
+		x = x * 2/window.innerWidth - 1;
+		y = -y * 2/window.innerHeight + 1;
+		var rayo = new THREE.Raycaster();
+		rayo.setFromCamera( new THREE.Vector2(x,y), camera);
+
+		var interseccion = rayo.intersectObjects( scene.children, false );
+		if( interseccion.length > 0){
+			if(interseccion[0].object.name == 'button_play'){
+				loadPlay();
+			}
+			else if (interseccion[0].object.name == 'button_create') {
+				loadCreate();
+			}
+		}
+}
+
+function setupGUI()
+{
+	// Interfaz grafica de usuario 
+
+	// Controles
+	effectControls = {
+		mensaje: "Interfaz",
+		posY: 1.0,
+		separacion: [],
+		caja: true,
+		color: "rgb(255,0,0)"
+	};
+
+	// Interfaz
+	var gui = new dat.GUI();
+	var folder = gui.addFolder("Interfaz Soldado World");
+	folder.add( effectControls, "mensaje" ).name("App");
+	folder.add( effectControls, "posY", 1.0, 3.0, 0.1 ).name("Subir/Bajar");
+	folder.add( effectControls, "separacion", {Ninguna:0, Media:1, Maxima:2} ).name("Separacion");
+	folder.add( effectControls, "caja" ).name("Ver al soldado");
+	folder.addColor( effectControls, "color" ).name("Color texto");
+	dat.GUI.toggleHide();
+	dat.GUI.toggleHide();
+}
+
+function loadCreate()
+{
+	if(state == "init_menu")
+	{
+		scene.remove(button_play);
+		scene.remove(video_menu);
+		scene.remove(title);
+	}
+	if(state == "playend_menu")
+	{
+		scene.remove(button_play);
+		scene.remove(video_menu);
+		scene.remove(text_win);
+		scene.remove(text_lose);
+	}
+
+
+	state="create";
+	camera.position.set( 14, 35, -19 );
+	camera.lookAt( new THREE.Vector3( 12,0,-19 ) );
+
+	direccional.position.set( 30,30,-19 ); // Cambiar esto pa que las sombras se vean mas
+	direccional.intensity=0.9;
+
+	scene.add(m_fence);
+	scene.add(m_ground);
+	scene.add(m_grass);
+
+	scene.add(create_carrot.m_carrot);
+	scene.add(create_hay.m_hay);
+	scene.add(create_player.m_body);
+	scene.add(create_cow.m_body);
+
+	setupGUI();
 }
 
 function loadInitMenu()
@@ -346,15 +507,15 @@ function loadPlay() {
 			scene.remove(text_lose);
 		}
 		state="play";
-		camera.position.set( 30, 30, -18 );
-		camera.lookAt( new THREE.Vector3( 14,0,-18 ) );
+		camera.position.set( 30, 30, -19 );
+		camera.lookAt( new THREE.Vector3( 14,0,-19 ) );
 
 			// Control de camara
 		/*cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
 		cameraControls.target.set( 0, 3, 0 );
 		cameraControls.noZoom = false;*/
 
-		direccional.position.set( 30,30,-18 ); // Cambiar esto pa que las sombras se vean mas
+		direccional.position.set( 30,30,-19 ); // Cambiar esto pa que las sombras se vean mas
 		direccional.intensity=0.9;
 
 		scene.add(m_fence);
@@ -455,6 +616,9 @@ function update()
 				loadPlayEndMenu(true);
 			else if(lose)
 				loadPlayEndMenu(false);
+		break;
+		case "create":
+			create_hay.m_hay.children[0].children[1].material.setValues( {color:effectControls.color} );
 		break;
 	}
 }

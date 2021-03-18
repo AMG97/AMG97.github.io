@@ -37,6 +37,8 @@ class Cow {
 						child.castShadow = true;
 					});
 
+					create_cow = new Cow(5,22,"");
+
 				});
 			});
 		}, undefined, function (error){
@@ -46,79 +48,126 @@ class Cow {
 
 	constructor(x,z,dir,scene,matrix)
 	{
-		this.m_cow = new THREE.Object3D();
-
-		this.m_body = Cow.#model_body.clone();
-
-		this.m_tail = Cow.#model_tail.clone();
-		this.m_tail.position.z=-0.95;
-		this.m_tail.position.y=0.15;
-
-		this.m_leg_1 = Cow.#model_leg.clone();
-		this.m_leg_1.position.x=0.5;
-		this.m_leg_1.position.y=-0.5;
-
-		this.m_leg_2 = this.m_leg_1.clone();
-		this.m_leg_2.position.x=-0.48;
-		this.m_leg_2.rotation.y=Math.PI;
-
-		this.m_leg_3 = this.m_leg_1.clone();
-		this.m_leg_3.position.z=-0.75;
-
-		this.m_leg_4 = this.m_leg_3.clone();
-		this.m_leg_4.position.x=-0.48;
-		this.m_leg_4.rotation.y=Math.PI;
-
-		this.m_body.add(this.m_leg_1);
-		this.m_body.add(this.m_leg_2);
-		this.m_body.add(this.m_leg_3);
-		this.m_body.add(this.m_leg_4);
-		this.m_body.add(this.m_tail);
-
-		this.m_cow.add(this.m_body);
-
-		this.m_cow.scale.set(0.9,0.9,0.9);
-
-		this.m_cow.position.set(x*grid_size,1.2,-z*grid_size);
-		this.matrix=matrix;
-		this.matrix.changePosition(x,z,grid_enemy,this);
-		this.last_place=[x,z];
-		this.new_place=[x,z];
-
-		this.scene = scene;
-
-		this.scene.add(this.m_cow);
-
-		this.a_walk = new TWEEN.Tween(this.m_cow.position);
-		this.a_rot_y = new TWEEN.Tween(this.m_cow.rotation);
-		this.a_rot_x = new TWEEN.Tween(this.m_body.rotation);
-		this.a_rot_x.onComplete(()=>{
-			this.moving=0;
-		})
-		this.a_leg_1 = new TWEEN.Tween(this.m_leg_1.rotation);
-		this.a_leg_2 = new TWEEN.Tween(this.m_leg_2.rotation);
-		this.a_leg_3 = new TWEEN.Tween(this.m_leg_3.rotation);
-		this.a_leg_4 = new TWEEN.Tween(this.m_leg_4.rotation);
-		this.a_tail = new TWEEN.Tween(this.m_tail.rotation);
-
-		switch (dir)
+		if(dir != "")
 		{
-			case "left":
-			break;
+			this.m_cow = new THREE.Object3D();
 
-			case 'up':
-				this.m_cow.rotation.y -= Math.PI/2;
-			break;
+			this.m_body = Cow.#model_body.clone();
 
-			case 'down':
-				this.m_cow.rotation.y += Math.PI/2;
-			break;
+			this.m_tail = Cow.#model_tail.clone();
+			this.m_tail.position.z=-0.95;
+			this.m_tail.position.y=0.15;
 
-			case 'right':
-				this.m_cow.rotation.y += Math.PI;
-			break;
+			this.m_leg_1 = Cow.#model_leg.clone();
+			this.m_leg_1.position.x=0.5;
+			this.m_leg_1.position.y=-0.5;
+
+			this.m_leg_2 = this.m_leg_1.clone();
+			this.m_leg_2.position.x=-0.48;
+			this.m_leg_2.rotation.y=Math.PI;
+
+			this.m_leg_3 = this.m_leg_1.clone();
+			this.m_leg_3.position.z=-0.75;
+
+			this.m_leg_4 = this.m_leg_3.clone();
+			this.m_leg_4.position.x=-0.48;
+			this.m_leg_4.rotation.y=Math.PI;
+
+			this.m_body.add(this.m_leg_1);
+			this.m_body.add(this.m_leg_2);
+			this.m_body.add(this.m_leg_3);
+			this.m_body.add(this.m_leg_4);
+			this.m_body.add(this.m_tail);
+
+			this.m_cow.add(this.m_body);
+
+			this.m_cow.scale.set(0.9,0.9,0.9);
+
+			this.m_cow.position.set(x*grid_size,1.2,-z*grid_size);
+			this.matrix=matrix;
+			this.matrix.changePosition(x,z,grid_enemy,this);
+			this.last_place=[x,z];
+			this.new_place=[x,z];
+
+			this.scene = scene;
+
+			this.scene.add(this.m_cow);
+
+			this.a_walk = new TWEEN.Tween(this.m_cow.position);
+			this.a_rot_y = new TWEEN.Tween(this.m_cow.rotation);
+			this.a_rot_x = new TWEEN.Tween(this.m_body.rotation);
+			this.a_rot_x.onComplete(()=>{
+				this.moving=0;
+			})
+			this.a_leg_1 = new TWEEN.Tween(this.m_leg_1.rotation);
+			this.a_leg_2 = new TWEEN.Tween(this.m_leg_2.rotation);
+			this.a_leg_3 = new TWEEN.Tween(this.m_leg_3.rotation);
+			this.a_leg_4 = new TWEEN.Tween(this.m_leg_4.rotation);
+			this.a_tail = new TWEEN.Tween(this.m_tail.rotation);
+
+			switch (dir)
+			{
+				case "left":
+				break;
+
+				case 'up':
+					this.m_cow.rotation.y -= Math.PI/2;
+				break;
+
+				case 'down':
+					this.m_cow.rotation.y += Math.PI/2;
+				break;
+
+				case 'right':
+					this.m_cow.rotation.y += Math.PI;
+				break;
+			}
+			this.last_rot=dir;
 		}
-		this.last_rot=dir;
+		else{
+			this.m_body = Cow.#model_body.clone();
+			this.m_body.traverse(function(child){
+				child.name="cow";
+			});
+			this.m_body.name="cow";
+
+			this.m_tail = Cow.#model_tail.clone();
+			this.m_tail.position.z=-0.95;
+			this.m_tail.position.y=0.15;
+			this.m_tail.traverse(function(child){
+				child.name="cow";
+			});
+			this.m_tail.name="cow";
+
+			this.m_leg_1 = Cow.#model_leg.clone();
+			this.m_leg_1.position.x=0.5;
+			this.m_leg_1.position.y=-0.5;
+			this.m_leg_1.traverse(function(child){
+				child.name="cow";
+			});
+			this.m_leg_1.name="cow";
+
+			this.m_leg_2 = this.m_leg_1.clone();
+			this.m_leg_2.position.x=-0.48;
+			this.m_leg_2.rotation.y=Math.PI;
+
+			this.m_leg_3 = this.m_leg_1.clone();
+			this.m_leg_3.position.z=-0.75;
+
+			this.m_leg_4 = this.m_leg_3.clone();
+			this.m_leg_4.position.x=-0.48;
+			this.m_leg_4.rotation.y=Math.PI;
+
+			this.m_body.add(this.m_leg_1);
+			this.m_body.add(this.m_leg_2);
+			this.m_body.add(this.m_leg_3);
+			this.m_body.add(this.m_leg_4);
+			this.m_body.add(this.m_tail);
+
+			this.m_body.scale.set(0.9,0.9,0.9);
+
+			this.m_body.position.set(x*grid_size,1.2,-z*grid_size);
+		}
 	}
 
 	destroy()

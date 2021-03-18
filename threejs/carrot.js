@@ -12,6 +12,7 @@ class Carrot {
 			Carrot.#model_carrot.traverse(function(child){
 				child.castShadow = true;
 			});
+			create_carrot = new Carrot(9,22,"");
 		}, undefined, function (error){
 			console.error(error);
 		});
@@ -19,33 +20,47 @@ class Carrot {
 
 	constructor(x,z,scene,matrix)
 	{
-		this.m_carrot = new THREE.Object3D();
-		this.m_carrot = Carrot.#model_carrot.clone();
-
-		this.m_carrot.position.set(x*grid_size,0.9,-z*grid_size);
-		this.m_carrot.scale.set(0.8,0.8,0.8);
-		this.matrix=matrix;
-		this.matrix.addCarrot(x,z,this);
-
-
-		this.scene=scene;
-		this.scene.add(this.m_carrot);
-
-		this.a_rot = new TWEEN.Tween(this.m_carrot.rotation)
-					.to({y:this.m_carrot.rotation.y+Math.PI*2},Carrot.anim_speed)
-					.repeat(Infinity)
-					.start();
-
-		this.a_pos = new TWEEN.Tween(this.m_carrot.position)
-					.to({y:[0.4,0.9]},Carrot.anim_speed/1.2)
-					.repeat(Infinity)
-					.start();
-
-		this.a_down = new TWEEN.Tween(this.m_carrot.position)
-					.to({y:'-'+1.4},Cow.speed/2);
-		this.a_up = new TWEEN.Tween(this.m_carrot.position)
-					.to({y:'+'+1.4},Cow.speed/2);
-
+		if(scene != "")
+		{
+			this.m_carrot = new THREE.Object3D();
+			this.m_carrot = Carrot.#model_carrot.clone();
+	
+			this.m_carrot.position.set(x*grid_size,0.9,-z*grid_size);
+			this.m_carrot.scale.set(0.8,0.8,0.8);
+			this.matrix=matrix;
+			this.matrix.addCarrot(x,z,this);
+	
+	
+			this.scene=scene;
+			this.scene.add(this.m_carrot);
+	
+			this.a_rot = new TWEEN.Tween(this.m_carrot.rotation)
+						.to({y:this.m_carrot.rotation.y+Math.PI*2},Carrot.anim_speed)
+						.repeat(Infinity)
+						.start();
+	
+			this.a_pos = new TWEEN.Tween(this.m_carrot.position)
+						.to({y:[0.4,0.9]},Carrot.anim_speed/1.2)
+						.repeat(Infinity)
+						.start();
+	
+			this.a_down = new TWEEN.Tween(this.m_carrot.position)
+						.to({y:'-'+1.4},Cow.speed/2);
+			this.a_up = new TWEEN.Tween(this.m_carrot.position)
+						.to({y:'+'+1.4},Cow.speed/2);
+		}
+		else
+		{
+			this.m_carrot = new THREE.Object3D();
+			this.m_carrot = Carrot.#model_carrot.clone();
+			this.m_carrot.traverse(function(child){
+				child.name = "carrot";
+			});
+			this.m_carrot.name="carrot";
+	
+			this.m_carrot.position.set(x*grid_size,0.9,-z*grid_size);
+			this.m_carrot.scale.set(0.8,0.8,0.8);
+		}
 	}
 
 	animPause()
