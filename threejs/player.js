@@ -9,7 +9,7 @@ class Player {
 	last_place=[0,0];
 	new_place=[0,0];
 
-	speed=400;
+	static speed=400;
 	last_rot='down';
 	moving = 0;
 
@@ -37,7 +37,7 @@ class Player {
 						child.castShadow = true;
 					});
 
-					create_player = new Player(3,22,"");
+					create_player = new Player(13.5,5.5,"");
 
 				});
 			});
@@ -131,7 +131,9 @@ class Player {
 			this.m_body.add(this.m_leg_2);
 			this.m_body.scale.set(1,0.9,0.9);
 
-			this.m_body.position.set(x*grid_size,1.29,-z*grid_size);
+			this.m_body.rotation.set(0,0,Math.PI/2);
+
+			this.m_body.position.set(x*grid_size,0.5,-z*grid_size);
 		}
 	}
 
@@ -284,39 +286,39 @@ class Player {
 					{
 						this.moving=1;
 						this.a_rot_y.from(this.m_player.rotation);
-						this.a_rot_y.to({y:this.m_player.rotation.y+new_rot},this.speed/7);
+						this.a_rot_y.to({y:this.m_player.rotation.y+new_rot},Player.speed/7);
 						this.a_rot_y.start();
 						setTimeout(()=>{
 							this.moving=0;
-						},this.speed/7);
+						},Player.speed/7);
 					}
 				}
 
 				else{
 
 					this.a_walk.from(this.m_player.position);	
-					this.a_walk.to( {x:pos.x+changex,z:pos.z+changez}, this.speed);
+					this.a_walk.to( {x:pos.x+changex,z:pos.z+changez}, Player.speed);
 					
 					this.a_rot_x.from(this.m_body.rotation);
-					this.a_rot_x.to({x:[Player.#body_rot,0,-Player.#body_rot,0]},this.speed);
+					this.a_rot_x.to({x:[Player.#body_rot,0,-Player.#body_rot,0]},Player.speed);
 	
 					this.a_leg_1.from(this.m_leg_1.rotation);
-					this.a_leg_1.to({z:[-Player.#arm_leg_rot,0,Player.#arm_leg_rot,0]},this.speed);
+					this.a_leg_1.to({z:[-Player.#arm_leg_rot,0,Player.#arm_leg_rot,0]},Player.speed);
 	
 					this.a_leg_2.from(this.m_leg_2.rotation);
-					this.a_leg_2.to({z:[Player.#arm_leg_rot,0,-Player.#arm_leg_rot,0]},this.speed);
+					this.a_leg_2.to({z:[Player.#arm_leg_rot,0,-Player.#arm_leg_rot,0]},Player.speed);
 	
 					this.a_arm_1.from(this.m_arm_1.rotation);
-					this.a_arm_1.to({z:[Player.#arm_leg_rot,0,-Player.#arm_leg_rot,0]},this.speed);
+					this.a_arm_1.to({z:[Player.#arm_leg_rot,0,-Player.#arm_leg_rot,0]},Player.speed);
 	
 					this.a_arm_2.from(this.m_arm_2.rotation);
-					this.a_arm_2.to({z:[Player.#arm_leg_rot,0,-Player.#arm_leg_rot,0]},this.speed);
+					this.a_arm_2.to({z:[Player.#arm_leg_rot,0,-Player.#arm_leg_rot,0]},Player.speed);
 	
 					if(new_rot !=0)
 					{
 						this.moving=1;
 						this.a_rot_y.from(this.m_player.rotation);
-						this.a_rot_y.to({y:this.m_player.rotation.y+new_rot},this.speed/5);
+						this.a_rot_y.to({y:this.m_player.rotation.y+new_rot},Player.speed/5);
 						this.a_rot_y.start();
 						setTimeout(()=>{
 
@@ -324,7 +326,7 @@ class Player {
 								this.matrix.changePosition(this.last_place[0],this.last_place[1],grid_empty,"");
 								this.matrix.changePosition(this.new_place[0],this.new_place[1],grid_player,this);
 								this.last_place=this.new_place.slice();
-							},this.speed/2);
+							},Player.speed/2);
 
 							this.a_walk.start();
 							this.a_rot_x.start();
@@ -334,8 +336,8 @@ class Player {
 							this.a_arm_2.start();
 							setTimeout(()=>{
 								this.moving=0;
-							},this.speed);
-						},this.speed/5);
+							},Player.speed);
+						},Player.speed/5);
 						
 					}
 					else
@@ -356,7 +358,7 @@ class Player {
 								this.last_place=this.new_place.slice();
 							}
 
-						},this.speed/2);
+						},Player.speed/2);
 						this.a_walk.start();
 						this.a_rot_x.start();
 						this.a_leg_1.start();
@@ -365,7 +367,7 @@ class Player {
 						this.a_arm_2.start();
 						setTimeout(()=>{
 							this.moving=0;
-						},this.speed);
+						},Player.speed);
 					}
 				}
 			}

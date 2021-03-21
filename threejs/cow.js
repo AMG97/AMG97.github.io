@@ -37,7 +37,7 @@ class Cow {
 						child.castShadow = true;
 					});
 
-					create_cow = new Cow(5,22,"");
+					create_cow = new Cow(13.5,8.5,"");
 
 				});
 			});
@@ -165,6 +165,7 @@ class Cow {
 			this.m_body.add(this.m_tail);
 
 			this.m_body.scale.set(0.9,0.9,0.9);
+			this.m_body.rotation.set(0,0,Math.PI/2);
 
 			this.m_body.position.set(x*grid_size,1.2,-z*grid_size);
 		}
@@ -317,7 +318,7 @@ class Cow {
 								}
 								this.last_place=this.new_place.slice();
 
-							},Cow.speed/2);
+							},Cow.speed/2.2);
 
 							this.a_walk.start();
 							this.a_rot_x.start();

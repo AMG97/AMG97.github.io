@@ -12,7 +12,7 @@ class Carrot {
 			Carrot.#model_carrot.traverse(function(child){
 				child.castShadow = true;
 			});
-			create_carrot = new Carrot(9,22,"");
+			create_carrot = new Carrot(13.9,14,"");
 		}, undefined, function (error){
 			console.error(error);
 		});
@@ -57,9 +57,8 @@ class Carrot {
 				child.name = "carrot";
 			});
 			this.m_carrot.name="carrot";
-	
-			this.m_carrot.position.set(x*grid_size,0.9,-z*grid_size);
-			this.m_carrot.scale.set(0.8,0.8,0.8);
+			this.m_carrot.rotation.set(0,0,Math.PI/2);
+			this.m_carrot.position.set(x*grid_size,0.3,-z*grid_size);
 		}
 	}
 

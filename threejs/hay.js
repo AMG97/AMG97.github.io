@@ -10,7 +10,7 @@ class Hay {
 			Hay.#model_hay.traverse(function(child){
 				child.castShadow = true;
 			});
-			create_hay = new Hay(7,22,"");
+			create_hay = new Hay(13.5,11.5,"");
 		}, undefined, function (error){
 			console.error(error);
 		});

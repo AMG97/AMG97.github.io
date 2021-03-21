@@ -1,6 +1,6 @@
 // Variables globales estandar
 var renderer, scene, camera;
-var camerao, camerap;
+var minicam, camerap;
 
 
 var player="";
@@ -12,31 +12,40 @@ var state = "init_menu";
 
 var direccional;
 
+var carrot_in_create = false;
+
 
 
 //Entorno
-var m_grass, m_fence, m_ground;
+var m_grass, m_fence, m_ground, m_farm;
   const gltfloader = new THREE.GLTFLoader();
   gltfloader.load ('models/environment/grass.glb', function ( grass_gltf){
 	  gltfloader.load ('models/environment/ground.glb', function (ground_gltf){
-		  gltfloader.load( 'models/environment/fence.glb', function ( fence_gltf ) {	
-			  m_grass = grass_gltf.scene.children[0];
+		  gltfloader.load( 'models/environment/fence.glb', function ( fence_gltf ) {
+			gltfloader.load( 'models/environment/farm.glb', function ( farm_gltf ) {	
+				m_grass = grass_gltf.scene.children[0];
 
-			  m_grass.receiveShadow=true;
-  
-			  m_ground = ground_gltf.scene.children[0];
+				m_grass.receiveShadow=true;
 
-			  m_ground.receiveShadow=true;
-			  m_ground.name="ground";
-  
-			  m_fence = fence_gltf.scene.children[0];
+				m_ground = ground_gltf.scene.children[0];
 
-			  m_fence.castShadow = true;
+				m_ground.receiveShadow=true;
+				m_ground.name="ground";
 
-			  if(state!= "init_menu")
-			  {
+				m_fence = fence_gltf.scene.children[0];
+
+				m_fence.castShadow = true;
+
+				m_farm= farm_gltf.scene;
+				m_farm.traverse(function(child){
+					child.castShadow = true;
+				});
+
+				if(state!= "init_menu")
+				{
 				loadPlay();
-			  }
+				}
+			})
 		  })
 	  })
   }, undefined, function (error){
@@ -84,9 +93,7 @@ new THREE.FontLoader().load( "fonts/Alphakind_Regular.json",function(font){
 			button_play.position.z=0.1;
 			button_play.add(play);
 			button_play.position.y=0.2;
-
 			scene.add(button_play);
-
 
 			var geo_create = new THREE.TextGeometry( 
 				'CREAR',
@@ -153,6 +160,7 @@ var material_button = new THREE.MeshLambertMaterial( {
 // Acciones
 init();
 loadInitMenu();
+setupGUI();
 render();
 
 function init() {
@@ -161,6 +169,7 @@ function init() {
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.setClearColor( new THREE.Color(0x49F03B) );
+	renderer.autoClear = false; // <.......................
 	renderer.shadowMap.enabled = true;
 	document.getElementById('container').appendChild(renderer.domElement);
 	renderer.outputEncoding = THREE.sRGBEncoding;
@@ -170,9 +179,16 @@ function init() {
 	// Camara
 	var aspectRatio = window.innerWidth/window.innerHeight;
 	camerap = new THREE.PerspectiveCamera( 55, aspectRatio, 0.1, 100 );	// Perspectiva
-	//camerao = new THREE.OrthographicCamera( -3,3, 3/aspectRatio, -3/aspectRatio, 0.1, 100); //Ortografica
 	camera = camerap;
 	scene.add(camera);
+
+    // Minicam .....................................................
+    minicam = new THREE.OrthographicCamera(-22,22, 16,-16, -10,100);
+    minicam.position.set(10,1,-19);
+    minicam.up.set(-1,0,0);
+    minicam.lookAt(10,0,-19);
+    scene.add(minicam);
+
 	// Atender al eventos
 	window.addEventListener( 'resize', updateAspectRatio );
 
@@ -198,9 +214,6 @@ function init() {
 	direccional.shadow.bias = - 0.0001;
 
 	scene.add( direccional );
-
-	const direccional_help = new THREE.DirectionalLightHelper( direccional, d/2 );
-	scene.add( direccional_help );
 }
 
 
@@ -292,6 +305,7 @@ function buttonClick(event)
 					break;
 					case "carrot":
 						new Carrot(matrix_x,matrix_z,scene,grid_pruebas);
+						carrot_in_create = true;
 					break;
 				}
 			}
@@ -340,23 +354,56 @@ function setupGUI()
 
 	// Controles
 	effectControls = {
-		mensaje: "Interfaz",
-		posY: 1.0,
-		separacion: [],
+		color_hat: "rgb(255,86,0)",
+		color_hat_ribbon: "rgb(42,204,37)",
+		color_shirt: "rgb(204,10,6)",
+		color_overall: "rgb(2,18,100)",
+		color_shoes: "rgb(0,0,0)",
+
+		color_hay_ribbon: "rgb(197,0,0)",
+		color_fence: "rgb(255,255,255)",
+
 		caja: true,
-		color: "rgb(255,0,0)"
+
+		speed_player: 1100,
+		speed_hay: 100,
+		speed_cow: 750,
 	};
 
 	// Interfaz
 	var gui = new dat.GUI();
-	var folder = gui.addFolder("Interfaz Soldado World");
-	folder.add( effectControls, "mensaje" ).name("App");
-	folder.add( effectControls, "posY", 1.0, 3.0, 0.1 ).name("Subir/Bajar");
-	folder.add( effectControls, "separacion", {Ninguna:0, Media:1, Maxima:2} ).name("Separacion");
-	folder.add( effectControls, "caja" ).name("Ver al soldado");
-	folder.addColor( effectControls, "color" ).name("Color texto");
+	var folder_farmer = gui.addFolder("Interfaz Granjero");
+	folder_farmer.addColor( effectControls, "color_hat" ).name("Gorro");
+	folder_farmer.addColor( effectControls, "color_hat_ribbon" ).name("Cinta Gorro");
+	folder_farmer.addColor( effectControls, "color_shirt").name("Camiseta");
+	folder_farmer.addColor( effectControls, "color_overall").name("Peto");
+	folder_farmer.addColor( effectControls, "color_shoes" ).name("Zapatos");
+	folder_farmer.add( effectControls, "speed_player", 100, 1400, 50 ).name("Velocidad");
+
+
+	var folder_environment = gui.addFolder("Interfaz Entorno");
+	folder_environment.addColor( effectControls, "color_hay_ribbon" ).name("Cinta Heno");
+	folder_environment.add( effectControls, "speed_hay", 0, 600, 50 ).name("Vel. Heno");
+	folder_environment.addColor( effectControls, "color_fence" ).name("Vallas");
+	folder_environment.add( effectControls, "caja" ).name("Ver granja");
+	folder_environment.add( effectControls, "speed_cow", 100, 1400, 50 ).name("Vel. Vaca");
+	
+	gui.add({ add:function(){ //esto tendria que ser una funcion que quitara el gui, los objetos del lao y cambiara el estado a play y puede que cambiar la camara.
+		if(player!=undefined && carrot_in_create == true)
+		{
+			dat.GUI.toggleHide();
+
+			scene.remove(create_carrot.m_carrot);
+			scene.remove(create_hay.m_hay);
+			scene.remove(create_cow.m_body);
+			state="play";
+			camera.position.set( 30, 30, -19 );
+			camera.lookAt( new THREE.Vector3( 14,0,-19 ) );
+		}
+		console.log("clicked") }},'add').name("Jugar");
 	dat.GUI.toggleHide();
-	dat.GUI.toggleHide();
+	folder_farmer.open();
+	folder_environment.open();
 }
 
 function loadCreate()
@@ -364,6 +411,7 @@ function loadCreate()
 	if(state == "init_menu")
 	{
 		scene.remove(button_play);
+		scene.remove(button_create);
 		scene.remove(video_menu);
 		scene.remove(title);
 	}
@@ -371,34 +419,38 @@ function loadCreate()
 	{
 		scene.remove(button_play);
 		scene.remove(video_menu);
+		scene.remove(button_create);
 		scene.remove(text_win);
 		scene.remove(text_lose);
 	}
+	carrot_in_create = false;
 
 
 	state="create";
-	camera.position.set( 14, 35, -19 );
-	camera.lookAt( new THREE.Vector3( 12,0,-19 ) );
+	camera.position.set( 14, 35, -20 );
+	camera.lookAt( new THREE.Vector3( 12,0,-20 ) );
 
-	direccional.position.set( 30,30,-19 ); // Cambiar esto pa que las sombras se vean mas
+	direccional.position.set( 20,30,-22 ); // Cambiar esto pa que las sombras se vean mas
 	direccional.intensity=0.9;
 
 	scene.add(m_fence);
 	scene.add(m_ground);
 	scene.add(m_grass);
+	scene.add(m_farm);
 
 	scene.add(create_carrot.m_carrot);
 	scene.add(create_hay.m_hay);
 	scene.add(create_player.m_body);
 	scene.add(create_cow.m_body);
 
-	setupGUI();
+	dat.GUI.toggleHide();
 }
 
 function loadInitMenu()
 {
    	renderer.domElement.addEventListener('mousemove',buttonHover);
    	renderer.domElement.addEventListener('click',buttonClick);
+	setupKeyControls();	
 
 	direccional.position.set( 0,1,1 );
 	direccional.intensity=0.7;
@@ -411,6 +463,7 @@ function loadInitMenu()
 		state = "init_menu";
 		scene.add(title);
 		scene.add(button_play);
+		scene.add(button_create);
 	}
 
 	if(video_menu == undefined)
@@ -474,6 +527,7 @@ function loadPlayEndMenu(win_game)
 	scene.remove(m_fence);
 	scene.remove(m_ground);
 	scene.remove(m_grass);
+	scene.remove(m_farm);
 
 	scene.add(video_menu);
 	if(win_game)
@@ -481,6 +535,7 @@ function loadPlayEndMenu(win_game)
 	else
    		scene.add(text_lose);
 	scene.add(button_play);
+	scene.add(button_create);
 
 	direccional.position.set( 0,1,1 );
 	direccional.intensity=0.7;
@@ -491,23 +546,25 @@ function loadPlayEndMenu(win_game)
 
 function loadPlay() {
 
-	if(m_fence != undefined && m_grass != undefined && m_ground!=undefined)
+	if(m_fence != undefined && m_grass != undefined && m_ground!=undefined || m_farm != undefined)
 	{
 		if(state == "init_menu")
 		{
 			scene.remove(button_play);
+			scene.remove(button_create);
 			scene.remove(video_menu);
 			scene.remove(title);
 		}
 		if(state == "playend_menu")
 		{
 			scene.remove(button_play);
+			scene.remove(button_create);
 			scene.remove(video_menu);
 			scene.remove(text_win);
 			scene.remove(text_lose);
 		}
 		state="play";
-		camera.position.set( 30, 30, -19 );
+		camera.position.set( 33, 18, -19 );
 		camera.lookAt( new THREE.Vector3( 14,0,-19 ) );
 
 			// Control de camara
@@ -515,14 +572,13 @@ function loadPlay() {
 		cameraControls.target.set( 0, 3, 0 );
 		cameraControls.noZoom = false;*/
 
-		direccional.position.set( 30,30,-19 ); // Cambiar esto pa que las sombras se vean mas
+		direccional.position.set( 20,30,-22 ); // Cambiar esto pa que las sombras se vean mas
 		direccional.intensity=0.9;
 
 		scene.add(m_fence);
 		scene.add(m_ground);
 		scene.add(m_grass);
-
-		setupKeyControls();	
+		scene.add(m_farm);
 
 		//CREAR NIVEL DE PRUEBA
 		player = new Player(5,9,scene,grid_pruebas);
@@ -560,6 +616,10 @@ function loadPlay() {
 
 		new Carrot(1,18,scene,grid_pruebas);
 		new Carrot(1,19,scene,grid_pruebas);
+
+		Player.speed = 400;
+		Cow.speed = 750;
+		Hay.speed = 100;
 	}
 }
 
@@ -618,7 +678,21 @@ function update()
 				loadPlayEndMenu(false);
 		break;
 		case "create":
-			create_hay.m_hay.children[0].children[1].material.setValues( {color:effectControls.color} );
+			create_player.m_body.children[0].children[0].material.setValues( {color:effectControls.color_shirt} );
+			create_player.m_body.children[0].children[1].material.setValues( {color:effectControls.color_overall} );
+			create_player.m_body.children[0].children[6].material.setValues( {color:effectControls.color_hat} );
+			create_player.m_body.children[0].children[7].material.setValues( {color:effectControls.color_hat_ribbon} );
+			create_player.m_arm_1.children[0].children[0].material.setValues( {color:effectControls.color_shirt} );
+			create_player.m_leg_1.children[0].children[0].material.setValues( {color:effectControls.color_overall} );
+			create_player.m_leg_1.children[0].children[1].material.setValues( {color:effectControls.color_shoes} );
+			Player.speed = 1500 - effectControls.speed_player;
+			Cow.speed = 1500 - effectControls.speed_cow;
+
+			create_hay.m_hay.children[0].children[1].material.setValues( {color:effectControls.color_hay_ribbon} );
+			m_fence.material.setValues( {color:effectControls.color_fence} );
+			Hay.speed = 600 - effectControls.speed_hay;
+
+			m_farm.visible = effectControls.caja;
 		break;
 	}
 }
@@ -627,7 +701,17 @@ function render() {
 	// Blucle de refresco
 	requestAnimationFrame( render );
 	update();
+
+    renderer.clear();
+
+    renderer.setViewport(0,0,window.innerWidth,window.innerHeight);
 	renderer.render( scene, camera );
+
+	if(state=="play")
+	{
+		renderer.setViewport( window.innerWidth-210,10,200,150 );
+		renderer.render( scene, minicam );		
+	}
 }
 
 function setupKeyControls() {
