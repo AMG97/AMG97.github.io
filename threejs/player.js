@@ -48,6 +48,9 @@ class Player {
 
 	constructor(x,z,scene,matrix)
 	{
+		this.last_place=[x,z];
+		this.new_place=[x,z];
+
 		if(scene != "")
 		{
 			this.m_player = new THREE.Object3D();
@@ -80,8 +83,6 @@ class Player {
 			this.m_player.position.set(x*grid_size,1.29,-z*grid_size);
 			this.matrix=matrix;
 			this.matrix.changePosition(x,z,grid_player);
-			this.last_place=[x,z];
-			this.new_place=[x,z];
 
 			this.scene = scene;
 
@@ -97,7 +98,7 @@ class Player {
 		}
 		else
 		{
-			this.m_body = Player.#model_body.clone();
+			/*this.m_body = Player.#model_body.clone();
 			this.m_body.traverse(function(child){
 				child.name="player";
 			});
@@ -133,7 +134,7 @@ class Player {
 
 			this.m_body.rotation.set(0,0,Math.PI/2);
 
-			this.m_body.position.set(x*grid_size,0.5,-z*grid_size);
+			this.m_body.position.set(x*grid_size,0.5,-z*grid_size);*/
 		}
 	}
 
@@ -375,4 +376,6 @@ class Player {
 	}
 }
 
-Player.loadModels();
+module.exports = {
+    Player: Player
+}
