@@ -1,3 +1,5 @@
+const THREE = require('three');
+const GLTFLoader = require('three-gltf-loader');
 class Player {
 	static #model_body;
 	static #model_arm;
@@ -15,7 +17,7 @@ class Player {
 
 	static loadModels()
 	{
-		const gltfloader = new THREE.GLTFLoader();
+		const gltfloader = new GLTFLoader();
 		gltfloader.load( 'models/farmer/farmer.glb', function ( farmer_gltf ) {
 
 			gltfloader.load('models/farmer/farmer_leg.glb', function (farmer_leg_gltf){
@@ -98,7 +100,7 @@ class Player {
 		}
 		else
 		{
-			/*this.m_body = Player.#model_body.clone();
+			this.m_body = Player.#model_body.clone();
 			this.m_body.traverse(function(child){
 				child.name="player";
 			});
@@ -134,7 +136,7 @@ class Player {
 
 			this.m_body.rotation.set(0,0,Math.PI/2);
 
-			this.m_body.position.set(x*grid_size,0.5,-z*grid_size);*/
+			this.m_body.position.set(x*grid_size,0.5,-z*grid_size);
 		}
 	}
 
