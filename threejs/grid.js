@@ -128,3 +128,5 @@ class Grid {
 
     checkCarrots
 }
+
+var grid_pruebas = new Grid();

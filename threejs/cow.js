@@ -358,3 +358,5 @@ class Cow {
 		}
 	}
 }
+
+Cow.loadModels();

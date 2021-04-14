@@ -155,11 +155,6 @@ var material_button = new THREE.MeshLambertMaterial( {
 	wireframe: false,
 });
 
-Player.loadModels();
-Cow.loadModels();
-Carrot.loadModels();
-Hay.loadModels();
-
 
 
 // Acciones

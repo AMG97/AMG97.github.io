@@ -106,3 +106,5 @@ class Carrot {
 	}
 
 }
+
+Carrot.loadModels();

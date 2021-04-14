@@ -1,5 +1,3 @@
-const THREE = require('three');
-const GLTFLoader = require('three-gltf-loader');
 class Player {
 	static #model_body;
 	static #model_arm;
@@ -17,7 +15,7 @@ class Player {
 
 	static loadModels()
 	{
-		const gltfloader = new GLTFLoader();
+		const gltfloader = new THREE.GLTFLoader();
 		gltfloader.load( 'models/farmer/farmer.glb', function ( farmer_gltf ) {
 
 			gltfloader.load('models/farmer/farmer_leg.glb', function (farmer_leg_gltf){
@@ -50,9 +48,6 @@ class Player {
 
 	constructor(x,z,scene,matrix)
 	{
-		this.last_place=[x,z];
-		this.new_place=[x,z];
-
 		if(scene != "")
 		{
 			this.m_player = new THREE.Object3D();
@@ -85,6 +80,8 @@ class Player {
 			this.m_player.position.set(x*grid_size,1.29,-z*grid_size);
 			this.matrix=matrix;
 			this.matrix.changePosition(x,z,grid_player);
+			this.last_place=[x,z];
+			this.new_place=[x,z];
 
 			this.scene = scene;
 
@@ -378,6 +375,4 @@ class Player {
 	}
 }
 
-module.exports = {
-    Player: Player
-}
+Player.loadModels();

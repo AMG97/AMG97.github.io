@@ -59,3 +59,5 @@ class Hay {
 	}
 
 }
+
+Hay.loadModels();
